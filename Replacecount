@@ -1,0 +1,37 @@
+import os
+
+def replace_string_in_html_files(folder_path, replacements, encodings):
+    # フォルダ内の全てのファイルを走査
+    for root, dirs, files in os.walk(folder_path):
+        for file in files:
+            if file.endswith('.html'):
+                file_path = os.path.join(root, file)
+                # 各エンコーディングでファイルを試す
+                for encoding in encodings:
+                    try:
+                        with open(file_path, 'r', encoding=encoding) as f:
+                            content = f.read()
+                        replaced = False
+                        # 置換の実行と置換箇所のカウント
+                        for old_string, new_string in replacements:
+                            if old_string in content:
+                                content = content.replace(old_string, new_string)
+                                replaced = True
+                        if replaced:
+                            with open(file_path, 'w', encoding=encoding) as f:
+                                f.write(content)
+                            print(f'Replaced in: {file_path}')
+                        break  # 正常に処理された場合はループを終了
+                    except UnicodeDecodeError:
+                        continue
+                    except Exception as e:
+                        print(f'Error processing file: {file_path} ({e})')
+
+# 使用例
+folder_path = '/path/to/folder'  # 対象のフォルダのパスを指定
+replacements = [('<old_string1>', '<new_string1>'), ('<old_string2>', '<new_string2>')]  # 置換対象と置換後の文字列のペアを指定
+
+# 使用するエンコーディングのリストを指定
+encodings = ['utf-8', 'latin-1', 'shift-jis']
+
+replace_string_in_html_files(folder_path, replacements, encodings)
